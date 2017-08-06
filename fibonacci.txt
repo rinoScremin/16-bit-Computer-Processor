@@ -1,0 +1,170 @@
+jmp main
+
+hello: dw 00680065006c006c006f002c00200065006e00740065007200200074006800650020006e0075006d0062006500720020 ;			DATA FOR OPENING TEXT STRING
+dw 6f0075006c00
+dw 0079006f00750020006c0069006b006500200074006f00200073007400610072007400200074006800650020
+dw 006600690062006f006e0061006300630069002000730065007200690065007300200077006900740068003f000a
+endHello: dw ffff
+
+goodBye: dw 000a000a00700072006f006700720061006d00200063006f006d0070006c0065007400650020ffff ; 					DATA FOR ENDING STRING
+
+main: mvi l,hello ;				MAIN PROGRAM  
+call output
+main1: mvi l,3000
+call input
+mvi l,3001
+call BCDtoBin
+mov a,c
+call getFibNums
+mvi l,goodBye
+call output
+hult
+
+output: mov a,m ;				OUT PUT TEXT TO SCREEN SUB-METHOD 
+inr l
+out1
+cpi ffff
+rnz
+jmp output
+
+input: in2 ;					GET INPUT FROM THE KEYBORAD AND SAVE IT IN RAM ADDRESS REG(L) AND OUTPUT TO TTY SCREEN
+cpi 0001
+jnz print 
+jmp input
+print: in1
+out1
+inr l
+mov b,a
+mov m,b
+cpi 000a
+rnz
+jz input
+ret
+
+
+BCDtoBin: mov a,m
+ani 000f
+mov m,a
+cpi 000a
+jnz convert
+inr c
+inr l
+jmp BCDtoBin
+convert: mvi a,3000
+add c
+mov h,a 
+mvi a,0000
+mov e,m
+add e
+mov c,a
+dcr l
+mvi b,000a
+nextDigit: mov a,m
+mov d,b
+call mul
+add c
+mov c,a
+mvi b,000a
+mov a,d
+call mul
+mov b,a
+mov a,l
+dcr l
+cpi 3000
+jz nextDigit
+mov a,c
+ret
+
+
+mul: push b ;					MULTIPLE FUNCTION **TAKES NUMBER IN REG(A) AND MULTIPLES IT TO REG(B) 
+push d
+push h
+mvi c,0000
+mov e,a
+dcr b
+mulLoop: inr c
+add e
+mov l,a
+mov a,c
+cmp b
+jnz outPut
+mov a,h
+jmp mulLoop
+outPut: mov a,h
+pop h
+pop d 
+pop b
+mov c,b
+mov b,d
+mov d,e
+mov e,b
+mov b,l
+mov l,h
+mov h,b
+ret
+
+getFibNums: mov b,a
+mov c,a
+add b
+mov e,a
+call outputData
+mov a,e
+nextFib: mov c,a
+add b 
+mov b,c
+mov e,a
+call outputData
+mov a,e
+sbi 270f
+jp return
+mov a,e
+jmp nextFib
+return: ret
+
+outputData: daa
+mov d,a
+ani f000
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+adi 0030
+out1
+mov a,d
+ani 0f00
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+rar
+adi 0030
+out1
+mov a,d
+ani 00f0
+rar
+rar
+rar
+rar
+adi 0030
+out1
+mov a,d
+ani 000f
+adi 0030
+out1
+mvi a,0020
+out1
+ret
+
+
+ 
